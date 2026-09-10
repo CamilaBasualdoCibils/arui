@@ -1,0 +1,38 @@
+{
+  "name": "atlasnet",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "glm",
+    "nlohmann-json",
+    "boost-type-traits",
+    "boost-uuid",
+    "boost-geometry",
+    "boost-graph",
+    "boost-multi-index",
+    "boost-container",
+    "boost-describe",
+    "boost-stacktrace",
+    "boost-static-string",
+    "boost-program-options",
+    {
+      "name": "spdlog",
+      "features": [
+        "fmt"
+      ]
+    },
+    {
+      "name": "imgui",
+      "features": [
+        "freetype-svg",
+        "glfw-binding",
+        "opengl3-binding",
+        "vulkan-binding"
+      ]
+    },
+    "implot",
+    {"name":"glfw3","features":["wayland"]},
+    "glew",
+    {"name":"openxr-loader","features":["vulkan"]},
+    "vulkan"
+  ]
+}
