@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Render/RenderEnums.hpp"
+#include "vulkan/vulkan.hpp"
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <span>
@@ -126,7 +127,7 @@ struct RenderPassDesc {
 
   bool clearColor = false;
   bool clearDepth = false;
-  glm::uvec2 dimensions;
+  glm::uvec2 extent;
   glm::uvec2 offset;
 };
 struct RenderCapabilities {

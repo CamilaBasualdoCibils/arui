@@ -35,15 +35,16 @@ int ARUI::AruiServer::Run() {
       Render::GraphicsPipelineDesc{.vertexShader = vertShaderModule,
                                    .fragmentShader = fragShaderModule});
 
-  auto glDevice =
-      std::dynamic_pointer_cast<Render::OpenGLRenderDevice>(renderDevice);
-      GLuint vao;
-      glCreateVertexArrays(1, &vao);
+  auto commandList =
+      renderDevice->CreateCommandList(Render::QueueType::GRAPHICS);
+  commandList->BeginRendering(
+      Render::RenderPassDesc{.extent = {800, 600}, .offset = {0, 0}});
+  commandList->BindPipeline(pipeline);
+  commandList->Draw(Render::PrimitiveTopology::Triangles, 0, 3);
+  commandList->EndRendering();
   while (!stopRequested) {
     presenter->BeginFrame();
-    glUseProgram(glDevice->GetGLPipeline(pipeline));
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    renderDevice->Submit(*commandList);
     presenter->EndFrame();
   }
 

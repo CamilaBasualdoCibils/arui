@@ -48,5 +48,39 @@ inline std::optional<GLenum> GetGLShaderStage(ShaderStageFlags stage) {
   }
   return std::nullopt;
 }
-
+const std::unordered_map<PrimitiveTopology, GLenum> primitiveTopologyToGLenumMap = {
+    {PrimitiveTopology::Points, GL_POINTS},
+    {PrimitiveTopology::Lines, GL_LINES},
+    {PrimitiveTopology::Triangles, GL_TRIANGLES}};
+inline std::optional<GLenum> GetGLPrimitiveTopology(PrimitiveTopology topology) {
+  auto it = primitiveTopologyToGLenumMap.find(topology);
+  if (it != primitiveTopologyToGLenumMap.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
+   struct GLVertexFormat
+    {
+      GLenum type;
+      GLint componentCount;
+      GLboolean normalized;
+    };
+const std::unordered_map<VertexFormat, GLVertexFormat> vertexFormatToGLenumMap = {
+    {VertexFormat::Float, GLVertexFormat{.type = GL_FLOAT, .componentCount = 1, .normalized = GL_FALSE}},
+    {VertexFormat::Float2, GLVertexFormat{.type = GL_FLOAT, .componentCount = 2, .normalized = GL_FALSE}},
+    {VertexFormat::Float3, GLVertexFormat{.type = GL_FLOAT, .componentCount = 3, .normalized = GL_FALSE}},
+    {VertexFormat::Float4, GLVertexFormat{.type = GL_FLOAT, .componentCount = 4, .normalized = GL_FALSE}},
+    {VertexFormat::UInt, GLVertexFormat{.type = GL_UNSIGNED_INT, .componentCount = 1, .normalized = GL_FALSE}},
+    {VertexFormat::UInt2, GLVertexFormat{.type = GL_UNSIGNED_INT, .componentCount = 2, .normalized = GL_FALSE}},
+    {VertexFormat::UInt3, GLVertexFormat{.type = GL_UNSIGNED_INT, .componentCount = 3, .normalized = GL_FALSE}},
+    {VertexFormat::UInt4, GLVertexFormat{.type = GL_UNSIGNED_INT, .componentCount = 4, .normalized = GL_FALSE}}};
+ 
+inline std::optional<GLVertexFormat> GetGLVertexFormat(VertexFormat format) {
+ 
+  auto it = vertexFormatToGLenumMap.find(format);
+  if (it != vertexFormatToGLenumMap.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
 } // namespace ARUI::Render::OpenGL

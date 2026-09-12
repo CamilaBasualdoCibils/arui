@@ -21,6 +21,7 @@ public:
   virtual void DestroyShaderModule(ShaderModuleHandle) = 0;
 
   virtual RenderCapabilities GetCapabilities() const = 0;
+  virtual void Submit(const IRenderCommandList & commandList) = 0;
 
 protected:
 };
