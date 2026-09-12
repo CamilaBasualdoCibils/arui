@@ -71,60 +71,43 @@ public:
     return handle;
   }
 
-  ShaderModuleHandle CreateShaderModule(const ShaderModuleDesc& desc) override
-{
+  ShaderModuleHandle CreateShaderModule(const ShaderModuleDesc &desc) override {
     const auto glShaderType = OpenGL::GetGLShaderStage(desc.stage);
     assert(glShaderType.has_value());
 
     GLuint shader = glCreateShader(*glShaderType);
 
-    glShaderBinary(
-        1,
-        &shader,
-        GL_SHADER_BINARY_FORMAT_SPIR_V,
-        desc.spirv.data(),
-        static_cast<GLsizei>(desc.spirv.size())
-    );
+    glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V,
+                   desc.spirv.data(), static_cast<GLsizei>(desc.spirv.size()));
 
     // SPIR-V must be specialized before it is considered compiled.
-    glSpecializeShader(
-        shader,
-        "main",   // SPIR-V entry point
-        0,
-        nullptr,
-        nullptr
-    );
+    glSpecializeShader(shader,
+                       "main", // SPIR-V entry point
+                       0, nullptr, nullptr);
 
     GLint compiled = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
-    if (compiled != GL_TRUE)
-    {
-        GLint infoLogLength = 0;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+    if (compiled != GL_TRUE) {
+      GLint infoLogLength = 0;
+      glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        if (infoLogLength > 0)
-        {
-            std::vector<GLchar> infoLog(infoLogLength);
-            glGetShaderInfoLog(
-                shader,
-                infoLogLength,
-                nullptr,
-                infoLog.data()
-            );
+      if (infoLogLength > 0) {
+        std::vector<GLchar> infoLog(infoLogLength);
+        glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
 
-            logger->error("Shader compile error: {}", infoLog.data());
-        }
+        logger->error("Shader compile error: {}", infoLog.data());
+      }
 
-        glDeleteShader(shader);
-        throw std::runtime_error("Failed to compile OpenGL SPIR-V shader.");
+      glDeleteShader(shader);
+      throw std::runtime_error("Failed to compile OpenGL SPIR-V shader.");
     }
 
     const ShaderModuleHandle handle = GenerateShaderModuleHandle();
     shaderModules[handle] = shader;
 
     return handle;
-}
+  }
   void DestroyPipeline(GraphicsPipelineHandle handle) override {
 
     glDeleteProgram(pipelines[handle].id);
@@ -151,6 +134,18 @@ public:
     assert(false && "Method `CreateCommandList` is not implemented.");
   }
   RenderCapabilities GetCapabilities() const override { return capabilities; }
+  GLuint GetGLTexture(TextureHandle handle) const {
+    return textures.at(handle).id;
+  }
+  GLuint GetGLBuffer(BufferHandle handle) const {
+    return buffers.at(handle).id;
+  }
+  GLuint GetGLShaderModule(ShaderModuleHandle handle) const {
+    return shaderModules.at(handle);
+  }
+  GLuint GetGLPipeline(GraphicsPipelineHandle handle) const {
+    return pipelines.at(handle).id;
+  }
 
 private:
   const RenderCapabilities capabilities{};

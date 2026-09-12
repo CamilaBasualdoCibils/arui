@@ -1,4 +1,5 @@
 #include "AruiServer.hpp"
+#include "Render/Backend/OpenGL/OpenGLCommons.hpp"
 #include "Render/Backend/OpenGL/OpenGLRenderDevice.hpp"
 #include "Render/Backend/Vulkan/VulkanRenderDevice.hpp"
 #include "Render/RenderCommons.hpp"
@@ -32,10 +33,17 @@ int ARUI::AruiServer::Run() {
 
   const Render::GraphicsPipelineHandle pipeline = renderDevice->CreatePipeline(
       Render::GraphicsPipelineDesc{.vertexShader = vertShaderModule,
-                                                         .fragmentShader = fragShaderModule});
+                                   .fragmentShader = fragShaderModule});
+
+  auto glDevice =
+      std::dynamic_pointer_cast<Render::OpenGLRenderDevice>(renderDevice);
+      GLuint vao;
+      glCreateVertexArrays(1, &vao);
   while (!stopRequested) {
     presenter->BeginFrame();
-    
+    glUseProgram(glDevice->GetGLPipeline(pipeline));
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     presenter->EndFrame();
   }
 
