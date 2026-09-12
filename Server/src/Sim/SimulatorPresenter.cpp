@@ -1,4 +1,4 @@
-#include "SimulatorPresenter.hpp"
+#include "Sim/SimulatorPresenter.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -50,6 +50,7 @@ void ARUI::Sim::SimulatorPresenter::BeginFrame() {
 void ARUI::Sim::SimulatorPresenter::Present(const RenderView &view,
                                             RenderTargetHandle target) {}
 void ARUI::Sim::SimulatorPresenter::EndFrame() {
+  DrawSimulator();
   ImGui::EndFrame();
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -62,13 +63,13 @@ ARUI::Sim::SimulatorPresenter::SimulatorPresenter() {
     throw std::runtime_error("GLEW failed to init");
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // required for OSX
-  glfwWindowHint(GLFW_RESIZABLE, false);
+  glfwWindowHint(GLFW_RESIZABLE, true);
   glfwSetErrorCallback(glfw_error_callback);
   glfwInit();
-  window = glfwCreateWindow(800, 600, "Simulator", nullptr, nullptr);
+  window = glfwCreateWindow(1920, 1080, "Simulator", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   if (glewInit() != GLEW_OK) {
     throw std::runtime_error("GLEW failed to init");
@@ -102,3 +103,6 @@ ARUI::Sim::SimulatorPresenter::SimulatorPresenter() {
 */
 }
 ARUI::Sim::SimulatorPresenter::~SimulatorPresenter() {}
+void ARUI::Sim::SimulatorPresenter::DrawSimulator() {
+ImGui::ShowDemoWindow();
+}

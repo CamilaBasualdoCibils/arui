@@ -8,11 +8,28 @@ set(CMAKE_C_COMPILER "/usr/bin/clang")
 include(cmake/FindDeps.cmake)
 #include(cmake/FetchLLVM.cmake)
 enable_testing()
+include(cmake/CompileShaders.cmake)
 
-file(GLOB_RECURSE ARUI_SERVER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Server/*.cpp")
+add_spirv_shader_library(
+    TARGET
+        ARUI_OpenGLShaders
+
+    DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}/Server/res/Shaders/OpenGL"
+
+    TARGET_ENV
+        opengl
+
+    NAMESPACE
+        ARUI::Shaders::OpenGL
+)
+
+file(GLOB_RECURSE ARUI_SERVER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Server/src/**.cpp")
 
 add_executable(AruiServer ${ARUI_SERVER_SOURCES})
 target_link_libraries(AruiServer PRIVATE
+    ARUI_OpenGLShaders
+
     Boost::container
     Boost::describe
     Boost::geometry
@@ -23,6 +40,7 @@ target_link_libraries(AruiServer PRIVATE
     Boost::type_traits
     Boost::uuid
     Boost::program_options
+    Boost::lockfree
     spdlog::spdlog
     nlohmann_json::nlohmann_json
     imgui::imgui
@@ -31,5 +49,9 @@ target_link_libraries(AruiServer PRIVATE
     GLEW::GLEW
     glm::glm
     OpenXR::headers OpenXR::openxr_loader
-    Vulkan::Vulkan)
-target_include_directories(AruiServer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Server")
+    fg::FrameGraph
+    Vulkan::Vulkan
+    GPUOpen::VulkanMemoryAllocator
+    bgfx::bx bgfx::bgfx bgfx::bimg bgfx::bimg_decode #For compatability
+)
+target_include_directories(AruiServer PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Server/include")

@@ -1,0 +1,3 @@
+[submodule "extern/FrameGraph"]
+	path = extern/FrameGraph
+	url = https://github.com/skaarj1989/FrameGraph.git

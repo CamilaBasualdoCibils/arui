@@ -3,6 +3,6 @@
 
 int main(int argc, char** argv)
 {
-    AruiServer server(argc, argv);
+    ARUI::AruiServer server(argc, argv);
     return server.Run();
 }

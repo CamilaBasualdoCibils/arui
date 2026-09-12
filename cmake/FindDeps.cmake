@@ -10,6 +10,7 @@ find_package(Boost REQUIRED CONFIG COMPONENTS
     type_traits
     uuid
     program_options
+    lockfree
 )
 
 find_package(spdlog CONFIG REQUIRED)
@@ -21,3 +22,7 @@ find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenXR CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+find_package(bgfx CONFIG REQUIRED)
+set(FG_BUILD_TEST OFF)
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/FrameGraph)

@@ -14,6 +14,7 @@
     "boost-stacktrace",
     "boost-static-string",
     "boost-program-options",
+    "boost-lockfree",
     {
       "name": "spdlog",
       "features": [
@@ -33,6 +34,8 @@
     {"name":"glfw3","features":["wayland"]},
     "glew",
     {"name":"openxr-loader","features":["vulkan"]},
-    "vulkan"
+    "vulkan",
+    "vulkan-memory-allocator",
+    "bgfx"
   ]
 }
