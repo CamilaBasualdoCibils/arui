@@ -1,6 +1,7 @@
 #include "Render/Backend/OpenGL/OpenGLRenderDevice.hpp"
 #include "Render/Backend/OpenGL/OpenGLCommandList.hpp"
 #include "Render/Backend/OpenGL/OpenGLCommons.hpp"
+#include "Render/RenderCommons.hpp"
 #include <unordered_set>
 static std::unordered_set<std::string> GetGLExtensions() {
   std::unordered_set<std::string> extensions;
@@ -24,17 +25,32 @@ static bool HasExtension(const std::unordered_set<std::string> &extensions,
   return extensions.contains(std::string{name});
 }
 ARUI::Render::OpenGLRenderDevice::OpenGLRenderDevice() : IRenderDevice() {}
-ARUI::Render::TextureHandle
-ARUI::Render::OpenGLRenderDevice::CreateTexture(const TextureDesc &desc) {
+ARUI::Render::ImageHandle
+ARUI::Render::OpenGLRenderDevice::CreateImage(const ImageDesc &desc) {
   GLTexture glTexture;
-  glCreateTextures(GL_TEXTURE_2D, 1, &glTexture.id);
-  std::optional<GLenum> glFormat = OpenGL::GetGLTextureFormat(desc.format);
-  assert(glFormat.has_value());
-  glTextureStorage2D(GL_TEXTURE_2D, 1, glFormat.value(), desc.width,
-                     desc.height);
-  TextureHandle handle = GenerateTextureHandle();
-  textures[handle] = glTexture;
-  return handle;
+  switch (desc.type) {
+
+  case ImageType::Image2D: {
+    glCreateTextures(GL_TEXTURE_2D, 1, &glTexture.id);
+    std::optional<GLenum> glFormat = OpenGL::GetGLImageFormat(desc.format);
+    assert(glFormat.has_value());
+    glTextureStorage2D(GL_TEXTURE_2D, 1, glFormat.value(), desc.extent.x,
+                       desc.extent.y);
+    ImageHandle handle = GenerateTextureHandle();
+    textures[handle] = glTexture;
+    return handle;
+  } break;
+  case ImageType::Image1D:
+  case ImageType::Image3D:
+  case ImageType::Image1DArray:
+  case ImageType::Image2DArray:
+  case ImageType::Cube:
+  case ImageType::CubeArray:
+  default: {
+    throw std::runtime_error("Unsupported image type.");
+  } break;
+  }
+  return ImageHandle(-1);
 }
 ARUI::Render::BufferHandle
 ARUI::Render::OpenGLRenderDevice::CreateBuffer(const BufferDesc &desc) {
@@ -56,8 +72,8 @@ ARUI::Render::GraphicsPipelineHandle
 ARUI::Render::OpenGLRenderDevice::CreatePipeline(
     const GraphicsPipelineDesc &graphicsDesc) {
   GLuint program = glCreateProgram();
-  glAttachShader(program, graphicsDesc.vertexShader);
-  glAttachShader(program, graphicsDesc.fragmentShader);
+  glAttachShader(program, graphicsDesc.vertexShader.value);
+  glAttachShader(program, graphicsDesc.fragmentShader.value);
   glLinkProgram(program);
   glValidateProgram(program);
   bool linked = false;
@@ -77,37 +93,24 @@ ARUI::Render::OpenGLRenderDevice::CreatePipeline(
 
   GLuint vao;
   glCreateVertexArrays(1, &vao);
-   for (const auto& binding : graphicsDesc.vertexLayout.bindings)
-    {
-        glVertexBindingDivisor(
-            binding.binding,
-            binding.perInstance ? 1 : 0
-        );
-    }
+  for (const auto &binding : graphicsDesc.vertexLayout.bindings) {
+    glVertexBindingDivisor(binding.binding, binding.perInstance ? 1 : 0);
+  }
 
-    for (const auto& attr : graphicsDesc.vertexLayout.attributes)
-    {
-        const auto glFormatOpt = OpenGL::GetGLVertexFormat(attr.format);
-        assert(glFormatOpt.has_value());
-        const auto glFormat = glFormatOpt.value();
+  for (const auto &attr : graphicsDesc.vertexLayout.attributes) {
+    const auto glFormatOpt = OpenGL::GetGLVertexFormat(attr.format);
+    assert(glFormatOpt.has_value());
+    const auto glFormat = glFormatOpt.value();
 
-        glEnableVertexAttribArray(attr.location);
+    glEnableVertexAttribArray(attr.location);
 
-        glVertexAttribFormat(
-            attr.location,
-            glFormat.componentCount,
-            glFormat.type,
-            glFormat.normalized,
-            attr.offset
-        );
+    glVertexAttribFormat(attr.location, glFormat.componentCount, glFormat.type,
+                         glFormat.normalized, attr.offset);
 
-        glVertexAttribBinding(
-            attr.location,
-            attr.binding
-        );
-    }
+    glVertexAttribBinding(attr.location, attr.binding);
+  }
 
-    glBindVertexArray(0);
+  glBindVertexArray(0);
   GraphicsPipelineHandle handle = GeneratePipelineHandle();
   GLPipeline glPipeline{
       .programId = program,
@@ -155,24 +158,22 @@ ARUI::Render::OpenGLRenderDevice::CreateShaderModule(
 
   return handle;
 }
-void ARUI::Render::OpenGLRenderDevice::DestroyPipeline(
-    GraphicsPipelineHandle handle) {
+void ARUI::Render::OpenGLRenderDevice::Destroy(GraphicsPipelineHandle handle) {
 
   glDeleteProgram(pipelines[handle].programId);
   glDeleteVertexArrays(1, &pipelines[handle].vaoId);
   pipelines.erase(handle);
 }
-void ARUI::Render::OpenGLRenderDevice::DestroyShaderModule(
-    ShaderModuleHandle handle) {
-      
+void ARUI::Render::OpenGLRenderDevice::Destroy(ShaderModuleHandle handle) {
+
   glDeleteShader(shaderModules[handle].id);
   shaderModules.erase(handle);
 }
-void ARUI::Render::OpenGLRenderDevice::DestroyTexture(TextureHandle handle) {
+void ARUI::Render::OpenGLRenderDevice::Destroy(ImageHandle handle) {
   glDeleteTextures(1, &textures[handle].id);
   textures.erase(handle);
 }
-void ARUI::Render::OpenGLRenderDevice::DestroyBuffer(BufferHandle) {
+void ARUI::Render::OpenGLRenderDevice::Destroy(BufferHandle) {
   // TODO: Implement this pure virtual method.
   assert(false && "Method `DestroyBuffer` is not implemented.");
 }
@@ -187,11 +188,7 @@ void ARUI::Render::OpenGLRenderDevice::Submit(
   auto commandQueue = glCommandList.GetCommandQueue();
   for (auto &command : commandQueue) {
 
-    std::visit(
-    [this](auto&& cmd) {
-        cmd.Execute(this);
-    },
-    command);
+    std::visit([this](auto &&cmd) { cmd.Execute(this); }, command);
   }
 }
 

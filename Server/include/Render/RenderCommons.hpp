@@ -7,23 +7,53 @@
 #include <span>
 #include <string_view>
 #include <variant>
+#include "Render/RenderHandle.hpp"
 namespace ARUI::Render {
-using TextureHandle = uint64_t;
 
 
-struct TextureDesc {
-  uint32_t width;
-  uint32_t height;
-  TextureFormat format;
+
+struct ImageTag{};
+using ImageHandle = Handle<ImageTag,uint64_t>;
+
+struct ImageDesc {
+  glm::uvec3 extent{1, 1, 1};
+
+  ImageFormat format = ImageFormat::Undefiend;
+
+  uint32_t mipLevels = 1;
+  uint32_t arrayLayers = 1;
+  uint32_t sampleCount = 1;
+
+  ImageUsage usage;
+  ImageType type = ImageType::Image2D;
 };
+struct ImageViewTag{};
+using ImageViewHandle = Handle<ImageViewTag,uint64_t>;
+struct ImageViewDesc {
+  ImageHandle image;
 
+  ImageFormat format = ImageFormat::Undefiend;
+
+  ImageType viewType = ImageType::Image2D;
+
+  uint32_t baseMipLevel = 0;
+  uint32_t mipLevelCount = 1;
+
+  uint32_t baseArrayLayer = 0;
+  uint32_t arrayLayerCount = 1;
+};
+struct SamplerTag{};
+using SamplerHandle = Handle<SamplerTag,uint64_t>;
+struct SamplerDesc {};
 struct BufferDesc {
   uint32_t size;
   BufferUsage usage;
 };
-using BufferHandle = uint64_t;
+struct BufferTag{};
+using BufferHandle = Handle<BufferTag,uint64_t>;
 
-using ShaderModuleHandle = uint64_t;
+struct ShaderModuleTag{};
+using ShaderModuleHandle = Handle<ShaderModuleTag,uint64_t>;
 struct ShaderModuleDesc {
   ShaderStageFlags stage;
 
@@ -32,98 +62,88 @@ struct ShaderModuleDesc {
 
   std::string_view entryPoint = "main";
 };
-using GraphicsPipelineHandle = uint64_t;
-using ComputePipelineHandle = uint64_t;
-struct VertexAttribute
-{
-    uint32_t location;
-    uint32_t binding;
-    VertexFormat format;
-    uint32_t offset;
+struct GraphicsPipelineTag{};
+using GraphicsPipelineHandle = Handle<GraphicsPipelineTag,uint64_t>;
+struct ComputePipelineTag{};
+using ComputePipelineHandle = Handle<ComputePipelineTag,uint64_t>;
+struct VertexAttribute {
+  uint32_t location;
+  uint32_t binding;
+  VertexFormat format;
+  uint32_t offset;
 };
 
-struct VertexBinding
-{
-    uint32_t binding;
-    uint32_t stride;
-    bool perInstance = false;
+struct VertexBinding {
+  uint32_t binding;
+  uint32_t stride;
+  bool perInstance = false;
 };
 
-struct VertexLayout
-{
-    std::vector<VertexBinding> bindings;
-    std::vector<VertexAttribute> attributes;
+struct VertexLayout {
+  std::vector<VertexBinding> bindings;
+  std::vector<VertexAttribute> attributes;
 };
-struct RasterState
-{
-    CullMode cullMode = CullMode::Back;
-    FrontFace frontFace = FrontFace::CounterClockwise;
-    PolygonMode polygonMode = PolygonMode::Fill;
+struct RasterState {
+  CullMode cullMode = CullMode::Back;
+  FrontFace frontFace = FrontFace::CounterClockwise;
+  PolygonMode polygonMode = PolygonMode::Fill;
 
-    bool depthClamp = false;
+  bool depthClamp = false;
 };
-struct DepthStencilState
-{
-    bool depthTest = true;
-    bool depthWrite = true;
+struct DepthStencilState {
+  bool depthTest = true;
+  bool depthWrite = true;
 
-    CompareOp depthCompare = CompareOp::Less;
+  CompareOp depthCompare = CompareOp::Less;
 };
-struct BlendAttachmentState
-{
-    bool enabled = false;
+struct BlendAttachmentState {
+  bool enabled = false;
 
-    BlendFactor srcColor = BlendFactor::One;
-    BlendFactor dstColor = BlendFactor::Zero;
-    BlendOp colorOp = BlendOp::Add;
+  BlendFactor srcColor = BlendFactor::One;
+  BlendFactor dstColor = BlendFactor::Zero;
+  BlendOp colorOp = BlendOp::Add;
 
-    BlendFactor srcAlpha = BlendFactor::One;
-    BlendFactor dstAlpha = BlendFactor::Zero;
-    BlendOp alphaOp = BlendOp::Add;
+  BlendFactor srcAlpha = BlendFactor::One;
+  BlendFactor dstAlpha = BlendFactor::Zero;
+  BlendOp alphaOp = BlendOp::Add;
 };
 
-struct BlendState
-{
-    std::vector<BlendAttachmentState> attachments;
+struct BlendState {
+  std::vector<BlendAttachmentState> attachments;
 };
-struct BindingDesc
-{
-    uint32_t binding;
-    BindingType type;
-    ShaderStageFlags stages;
+struct BindingDesc {
+  uint32_t binding;
+  BindingType type;
+  ShaderStageFlags stages;
 };
-struct BindGroupLayoutDesc
-{
-    std::vector<BindingDesc> bindings;
+struct BindGroupLayoutDesc {
+  std::vector<BindingDesc> bindings;
 };
-struct GraphicsPipelineDesc
-{
-    ShaderModuleHandle vertexShader;
-    ShaderModuleHandle fragmentShader;
+struct GraphicsPipelineDesc {
+  ShaderModuleHandle vertexShader;
+  ShaderModuleHandle fragmentShader;
 
-    VertexLayout vertexLayout;
+  VertexLayout vertexLayout;
 
-    PrimitiveTopology topology =
-        PrimitiveTopology::Triangles;
+  PrimitiveTopology topology = PrimitiveTopology::Triangles;
 
-    RasterState raster{};
-    DepthStencilState depthStencil{};
-    BlendState blend{};
+  RasterState raster{};
+  DepthStencilState depthStencil{};
+  BlendState blend{};
 
-    std::vector<BindGroupLayoutDesc> bindGroups;
+  std::vector<BindGroupLayoutDesc> bindGroups;
 
-    std::vector<TextureFormat> colorFormats;
-    TextureFormat depthFormat =
-        TextureFormat::UNDEFINED;
+  std::vector<ImageFormat> colorFormats;
+  ImageFormat depthFormat = ImageFormat::Undefiend;
 
-    uint32_t sampleCount = 1;
+  uint32_t sampleCount = 1;
 };
 struct ComputePipelineDesc {
   ShaderModuleHandle computeShader;
 };
 struct RenderPassDesc {
-  TextureHandle colorAttachment;
-  TextureHandle depthAttachment;
+  ImageViewHandle colorAttachment;
+  ImageViewHandle depthAttachment;
 
   bool clearColor = false;
   bool clearDepth = false;
@@ -139,4 +159,4 @@ struct RenderCapabilities {
   bool dmaBuf = false;
 };
 
-} // namespace ARUI
+} // namespace ARUI::Render

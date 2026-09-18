@@ -27,7 +27,8 @@
         "freetype-svg",
         "glfw-binding",
         "opengl3-binding",
-        "vulkan-binding"
+        "vulkan-binding",
+        "docking-experimental"
       ]
     },
     "implot",

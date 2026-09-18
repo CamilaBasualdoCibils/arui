@@ -1,10 +1,8 @@
 {
-    "C_Cpp.intelliSenseEngine": "disabled",
-    "cmake.debugConfig": {
-  "MIMode": "gdb",
-  "miDebuggerPath": "/usr/bin/gdb",
-  "args": []
-
-    }
-    
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "cmake.debugConfig": {
+    "MIMode": "gdb",
+    "miDebuggerPath": "/usr/bin/gdb",
+    "args": []
+  }
 }

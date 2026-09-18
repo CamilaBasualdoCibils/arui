@@ -32,7 +32,7 @@ public:
     assert(false && "Method `BindIndexBuffer` is not implemented.");
   }
 
-  void BindTexture(uint32_t slot, TextureHandle handle) override {
+  void BindTexture(uint32_t slot, ImageHandle handle) override {
     // TODO: Implement this pure virtual method.
     assert(false && "Method `BindTexture` is not implemented.");
   }
@@ -41,7 +41,7 @@ public:
             uint32_t firstVertex, uint32_t instanceCount = 1,
             uint32_t firstInstance = 0) override {
     commandQueue.push_back(DrawCommand{topology, vertexCount, firstVertex,
-                                  instanceCount, firstInstance});
+                                       instanceCount, firstInstance});
   }
 
   void DrawIndexed(uint32_t indexCount) override {
@@ -83,8 +83,6 @@ private:
   std::vector<Command> commandQueue;
 
 protected:
-  std::vector<Command> GetCommandQueue() const {
-    return commandQueue;
-  }
+  std::vector<Command> GetCommandQueue() const { return commandQueue; }
 };
 } // namespace ARUI::Render

@@ -48,13 +48,40 @@ void ARUI::Sim::SimulatorPresenter::BeginFrame() {
   ImGui::NewFrame();
 }
 void ARUI::Sim::SimulatorPresenter::Present(const RenderView &view,
-                                            RenderTargetHandle target) {}
+                                            RenderTargetHandle target) {
+  // window with toolbar and fullscreen image
+
+  if (ImGui::Begin(view.Name.c_str(), nullptr, ImGuiWindowFlags_MenuBar)) {
+    if (ImGui::BeginMenuBar()) {
+      if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Open")) {
+          // Handle open action
+        }
+        if (ImGui::MenuItem("Save")) {
+          // Handle save action
+        }
+        if (ImGui::MenuItem("Exit")) {
+          // Handle exit action
+        }
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenuBar();
+    }
+  }
+  ImGui::End();
+}
 void ARUI::Sim::SimulatorPresenter::EndFrame() {
   DrawSimulator();
   ImGui::EndFrame();
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
+  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    GLFWwindow *backup_current_context = glfwGetCurrentContext();
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    glfwMakeContextCurrent(backup_current_context);
+  }
 }
 
 ARUI::Sim::SimulatorPresenter::SimulatorPresenter() {
@@ -95,14 +122,9 @@ ARUI::Sim::SimulatorPresenter::SimulatorPresenter() {
   io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
   io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-  /* io.ConfigFlags |= ImGuiConfigFlags_DockingEnable *
-                    properties.imgui_docking_enable; // Enable Docking
-  io.ConfigFlags |=
-      ImGuiConfigFlags_ViewportsEnable * properties.imgui_viewports_enable; // E
-*/
+      ImGuiConfigFlags_NavEnableGamepad;              // Enable Gamepad Controls
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // E
 }
 ARUI::Sim::SimulatorPresenter::~SimulatorPresenter() {}
-void ARUI::Sim::SimulatorPresenter::DrawSimulator() {
-ImGui::ShowDemoWindow();
-}
+void ARUI::Sim::SimulatorPresenter::DrawSimulator() { ImGui::ShowDemoWindow(); }

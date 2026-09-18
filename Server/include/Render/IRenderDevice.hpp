@@ -6,7 +6,8 @@ namespace ARUI::Render {
 class IRenderDevice {
 public:
   IRenderDevice() {}
-  [[nodiscard]] virtual TextureHandle CreateTexture(const TextureDesc &) = 0;
+  [[nodiscard]] virtual ImageHandle CreateImage(const ImageDesc &) = 0;
+  [[nodiscard]] virtual ImageViewHandle CreateImageView(const ImageViewDesc &) = 0;
   [[nodiscard]] virtual BufferHandle CreateBuffer(const BufferDesc &) = 0;
   [[nodiscard]] virtual ShaderModuleHandle
   CreateShaderModule(const ShaderModuleDesc &) = 0;
@@ -15,10 +16,11 @@ public:
   CreateCommandList(QueueType type) = 0;
 
 
-  virtual void DestroyTexture(TextureHandle) = 0;
-  virtual void DestroyBuffer(BufferHandle) = 0;
-  virtual void DestroyPipeline(GraphicsPipelineHandle) = 0;
-  virtual void DestroyShaderModule(ShaderModuleHandle) = 0;
+  virtual void Destroy(ImageHandle) = 0;
+  virtual void Destroy(ImageViewHandle) = 0;
+  virtual void Destroy(BufferHandle) = 0;
+  virtual void Destroy(GraphicsPipelineHandle) = 0;
+  virtual void Destroy(ShaderModuleHandle) = 0;
 
   virtual RenderCapabilities GetCapabilities() const = 0;
   virtual void Submit(const IRenderCommandList & commandList) = 0;

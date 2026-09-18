@@ -13,7 +13,7 @@ class VulkanRenderDevice : public IRenderDevice {
 
 public:
   VulkanRenderDevice(std::shared_ptr<IPresenter> presenter);
-  TextureHandle CreateTexture(const TextureDesc &) override {
+  ImageHandle CreateImage(const ImageDesc &) override {
     // TODO: Implement this pure virtual method.
     assert(false && "Method `CreateTexture` is not implemented.");
   }
@@ -28,17 +28,17 @@ public:
     assert(false && "Method `CreatePipeline` is not implemented.");
   }
 
-  void DestroyTexture(TextureHandle) override {
+  void Destroy(ImageHandle) override {
     // TODO: Implement this pure virtual method.
     assert(false && "Method `DestroyTexture` is not implemented.");
   }
 
-  void DestroyBuffer(BufferHandle) override {
+  void Destroy(BufferHandle) override {
     // TODO: Implement this pure virtual method.
     assert(false && "Method `DestroyBuffer` is not implemented.");
   }
 
-  void DestroyPipeline(GraphicsPipelineHandle) override {
+  void Destroy(GraphicsPipelineHandle) override {
     // TODO: Implement this pure virtual method.
     assert(false && "Method `DestroyPipeline` is not implemented.");
   }

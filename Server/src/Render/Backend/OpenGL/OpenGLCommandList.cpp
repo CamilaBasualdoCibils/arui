@@ -23,8 +23,7 @@ void ARUI::Render::OpenGLCommandList::DrawCommand::Execute(
       ARUI::Render::OpenGL::GetGLPrimitiveTopology(topology);
   if (primitive.has_value()) {
 
-    glDrawArraysInstancedBaseInstance(primitive.value(), vertexCount,
-                                      firstVertex, instanceCount,
+    glDrawArraysInstancedBaseInstance(primitive.value(), firstVertex,vertexCount, instanceCount,
                                       firstInstance);
   } else {
     assert(false && "Invalid primitive topology.");
